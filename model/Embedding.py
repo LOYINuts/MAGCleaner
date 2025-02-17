@@ -3,7 +3,12 @@ import torch
 import math
 
 class KmerEmbedding(nn.Module):
-    pass
+    def __init__(self,vocab_size,d_model):
+        super(KmerEmbedding,self).__init__()
+        self.encoder = nn.Embedding(vocab_size,d_model)
+    
+    def forward(self,x):
+        return self.encoder(x)
 
 class PositionEmbedding(nn.Module):
     """位置编码
@@ -39,4 +44,12 @@ class PositionEmbedding(nn.Module):
     
 
 class FullEmbedding(nn.Module):
-    pass
+    def __init__(self,vocab:int,d_model:int,max_len:int,drop_prob:float,device:str):
+        super(FullEmbedding,self).__init__()
+        self.token_emb = KmerEmbedding(vocab,d_model)
+        self.pos_emb = PositionEmbedding(max_len,d_model,device)
+        self.drop = nn.Dropout(drop_prob)
+    def forward(self,x):
+        tok_emb = self.token_emb(x)
+        pos_emb = self.pos_emb(x)
+        return self.drop(tok_emb+pos_emb)
